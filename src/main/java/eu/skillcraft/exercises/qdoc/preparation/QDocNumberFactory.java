@@ -10,6 +10,7 @@ public class QDocNumberFactory {
 	private final TimePort timePort;
 	private final AuthPort authPort;
 
+	private final NumberGenerator generator = new NumberGenerator();
 
 	public QDocNumberFactory(SequencePort sequencePort, ConfigPort configPort, TimePort timePort, AuthPort authPort) {
 		this.sequencePort = sequencePort;
@@ -18,42 +19,12 @@ public class QDocNumberFactory {
 		this.authPort = authPort;
 	}
 
-	public QDocNumber create() {
-
-		boolean isDemo = configPort.isDemo();
-
-		return new QDocNumber(
+	public String create() {
+		return generator.generate(
 				sequencePort.next(),
 				configPort.systemType(),
 				YearMonth.now(timePort.clock()),
-				isDemo,
+				configPort.isDemo(),
 				authPort.isAuditor());
-	}
-
-	static class QDocNumber {
-
-		private final String value;
-		private final int next;
-		private final String systemType;
-		private final YearMonth yearMonth;
-		private final boolean isDemo;
-		private final boolean isAuditor;
-
-		QDocNumber(int next, String systemType, YearMonth yearMonth, boolean isDemo, boolean isAuditor) {
-			this.next = next;
-			this.systemType = systemType;
-			this.yearMonth = yearMonth;
-			this.isDemo = isDemo;
-			this.isAuditor = isAuditor;
-			String number = next + "/" + systemType + "/" + yearMonth.getMonthValue() + "/" + yearMonth.getYear();
-
-			if (isDemo) {
-				number = "DEMO/" + number;
-			}
-			if (isAuditor) {
-				number = number + "/AUDIT";
-			}
-			value = number;
-		}
 	}
 }
